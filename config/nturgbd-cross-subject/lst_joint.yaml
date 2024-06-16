@@ -1,0 +1,68 @@
+#work_dir: ./work_dir/ntu60/xsub/lst_joint
+
+# wandb
+wandb: False #True 
+wandb_name: 'LLM_new'
+model_name: 'Main_test'
+
+work_dir :  './output/ntu60/xsub/lst_joint/Main_test'
+# feeder
+feeder: feeders.feeder_ntu_RGB_pose.Feeder
+
+train_feeder_args:
+  data_path: data/ntu/NTU60_CS.npz
+  img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
+  #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
+  split: train
+  debug: False
+  random_choose: False
+  random_shift: False
+  random_move: False
+  window_size: 16 #64
+  normalization: False
+  random_rot: True
+  p_interval: [0.5, 1]
+  vel: False
+  bone: False
+  img_frame_interval: 1
+#  num_segments : 8
+
+test_feeder_args:
+  data_path: data/ntu/NTU60_CS.npz
+  img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
+  #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
+  split: test
+  window_size: 16 #64
+  p_interval: [0.95]
+  vel: False
+  bone: False
+  debug: False
+  img_frame_interval : 1
+  
+## model
+model: model.ctrgcn.Model_lst_4part #_same #mix
+model_args:
+  num_class: 60
+  num_point: 25
+  num_person: 2
+  graph: graph.ntu_rgb_d.Graph
+  k: 8
+  head: ['ViT-B/16']
+  graph_args:
+    labeling_mode: 'spatial'
+
+#optim
+weight_decay: 0.0005
+base_lr: 5.e-6  # 5.e-3 for resnet  #5.e-6 for ActionClip,  5.e-4 for clip
+lr_decay_rate: 0.1
+step: [35, 45]
+warm_up_epoch: 5
+prompt_length: 24
+class_position: "middle"
+
+# training
+device: [0]
+batch_size: 2 # 16 # 32
+test_batch_size: 2 #16 #32
+num_epoch: 55
+nesterov: True

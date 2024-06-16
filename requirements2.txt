@@ -1,0 +1,7 @@
+ftfy
+regex
+-e git+https://github.com/MartinXM/GAP.git@ca17b54267859a8c65a2b252872ba3853c010e19#egg=torchlight&subdirectory=torchlight
+matplotlib
+wandb
+einops
+randaugment

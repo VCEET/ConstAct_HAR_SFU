@@ -1,0 +1,16 @@
+data
+output
+ntu60
+figures
+wandb
+__pycache__/
+cs-venus-*
+cs-venuses
+requirements3.txt
+my_test.sh
+src/torchlight
+yolov*
+src/torchlight
+.vscode/*
+graph/infogcn/volvo.py
+graph/volvo.py

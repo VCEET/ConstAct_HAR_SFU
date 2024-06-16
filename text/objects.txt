@@ -1,0 +1,120 @@
+ drink water containing a glass
+ eat meal containing food
+ brush teeth containing a brush
+ brush hair containing a comb
+ drop containing an object
+ pick up containing an object
+ throw containing an object
+ sit down containing a chair
+ stand up containing a chair
+ clapping 
+ reading containing a book
+ writing containing a paper and pen
+ tear up paper containing a paper
+ put on jacket containing clothes
+ take off jacket containing clothes
+ put on a shoe containing a shoe
+ take off a shoe containing a shoe
+ put on glasses containing glasses
+ take off glasses containing glasses
+ put on a hat/cap containing a hat
+ take off a hat/cap containing a hat
+ cheer up
+ hand waving
+ kicking something containing an object
+ reach into pocket
+ hopping
+ jump up
+ phone call containing a phone
+ play with phone/tablet containing a phone
+ type on a keyboard containing a keyboard
+ point to something
+ taking a selfie containing a phone
+ check time (from watch) containing a watch
+ rub two hands
+ nod head/bow
+ shake head
+ wipe face containing a tissue
+ salute
+ put palms together
+ cross hands in front
+ sneeze/cough
+ staggering
+ falling down
+ headache
+ chest pain
+ back pain
+ neck pain
+ nausea/vomiting
+ fan self
+ punch/slap
+ kicking
+ pushing
+ pat on back
+ point finger
+ hugging
+ giving object containing an object
+ touch pocket
+ shaking hands
+ walking towards
+ walking apart
+ put on headphone containing a headphone
+ take off headphone containing a headphone
+ shoot at basket containing a basket
+ bounce ball containing a ball
+ tennis bat swing containing a tennis bat
+ juggle table tennis ball containing a ball
+ hush
+ flick hair
+ thumb up
+ thumb down
+ make OK sign containing fingers
+ make victory sign containing fingers
+ staple book containing a book
+ counting money containing money
+ cutting nails containing clippers
+ cutting paper containing scissors
+ snap fingers
+ open bottle containing a bootle
+ sniff/smell
+ squat down
+ toss a coin containing a coin
+ fold paper containing a paper
+ ball up paper containing a letter
+ play magic cube 
+ apply cream on face containing cream
+ apply cream on hand containing cream
+ put on bag containing a bag
+ take off bag containing a bag
+ put object into bag containing an object and bag
+ take object out of bag containing an object and bag
+ open a box containing a box
+ move heavy objects containing an object
+ shake fist
+ throw up cap/hat containing a hat
+ capitulate
+ cross arms
+ arm circles
+ arm swings
+ run on the spot
+ butt kicks
+ cross toe touch
+ side kick
+ yawn
+ stretch oneself
+ blow nose containing a tissue
+ hit with object containing an object
+ wield knife containing a knife
+ knock over
+ grab stuff containing an object
+ shoot with gun containing a gun
+ step on foot
+ high-five
+ cheers and drink containing glass/bottle
+ carry object containing an object
+ take a photo containing a camera
+ follow
+ whisper
+ exchange things containing an object
+ support somebody
+ rock-paper-scissors
