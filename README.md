@@ -10,6 +10,8 @@ Code and related docs for the results of the collaboration with Dr. Mohammad Mah
 
 - We provide the dependency file of our experimental environment, you can install all dependencies by creating a new anaconda virtual environment and running `pip install -r requirements.txt ` and `pip install -r requirements2.txt `
 
+pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
+
 # Data Preparation
 
 Please follow [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN) for data preparation
