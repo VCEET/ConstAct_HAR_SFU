@@ -902,12 +902,6 @@ class Processor():
             self.global_step = self.arg.start_epoch * len(self.data_loader['train']) / self.arg.batch_size
             def count_parameters(model):
                 return sum(p.numel() for p in model.parameters() if p.requires_grad)
-            self.print_log(f'# Skeleton Encoder Parameters: {count_parameters(self.skeleton_encoder)}')
-            self.print_log(f'# Visual Encoder Parameters: {count_parameters(self.model_visual.model.visual)}')
-            self.print_log(f'# Temporal Visual Parameters: {count_parameters(self.visual_encoder)}')
-            self.print_log(f'# Visual Text Parameters: {count_parameters(self.model_text)}')
-            self.print_log(f'# Skeleton Text Parameters: {count_parameters(self.model_text_2)}')
-            self.print_log(f'# Fusion Parameters: {count_parameters(self.fusion)}')
 
             start_epoch = 0
             for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
