@@ -103,7 +103,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd-cross-subject/lst_joint.yaml',
+        default='./config/ConstAct/lst_joint.yaml',
         help='path to the configuration file')
 
     # processor
