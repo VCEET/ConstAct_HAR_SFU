@@ -14,7 +14,8 @@ feeder: feeders.feeder_volvo_RGB_pose.Feeder
 
 train_feeder_args:
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-  data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
+  # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
+  data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
   #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
@@ -34,7 +35,8 @@ train_feeder_args:
 
 test_feeder_args:
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-  data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
+  # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
+  data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
   #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
