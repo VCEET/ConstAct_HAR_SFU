@@ -32,7 +32,6 @@ from Text_Prompt import *
 from KLLoss import KLLoss
 from feeders.Text_Visual_Prompt import *
 from model.Visual_Prompt import visual_prompt
-from model.heatmap import heatmap_renderer
 from model.Fuser import Fuser
 
 import wandb
@@ -132,7 +131,7 @@ def get_parser():
     parser.add_argument(
         '--save-epoch',
         type=int,
-        default=0,
+        default=30,
         help='the start epoch to save model (#iteration)')
     parser.add_argument(
         '--eval-interval',
@@ -371,15 +370,13 @@ class Processor():
             self.model_text_dict_2[name] = self.model_text_2
 
        #     del self.model_2.visual
-#            heatmap = heatmap_renderer()
-#            self.model_visual, self.model_pose, self.Pose2Feat = heatmap.model()
             self.model_visual = ImageCLIP(self.model_)
 
             self.model_visual = self.model_visual.cuda(self.output_device)
             self.model_visual_dict[name] = self.model_visual
 
             self.visual_encoder = visual_prompt("Transf",model_state_dict,8).cuda(self.output_device)
-            self.fusion = Fuser(self.output_device).cuda(self.output_device)
+            self.fusion = Fuser(self.output_device,self.arg.model_args['num_class']).cuda(self.output_device)
 
             ## Added for prompt learning CoOp
  #           self.prompt_learner = PromptLearner(class_names, self.model_,self.arg.prompt_length,self.arg.class_position).cuda(self.output_device) #PromptLearner(class_names, self.model_,self.arg.prompt_length).cuda(self.output_device)

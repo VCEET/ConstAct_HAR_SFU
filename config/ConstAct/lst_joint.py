@@ -89,7 +89,7 @@ class_position: "middle"
 
 # training
 device: [0]
-batch_size: 2 #16 # 32
-test_batch_size: 2 #16 #32
+batch_size: 16 # 32
+test_batch_size: 16 #32
 num_epoch: 55
 nesterov: True

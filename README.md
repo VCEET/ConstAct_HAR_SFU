@@ -17,3 +17,5 @@ pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --e
 Please follow [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN) for data preparation
 
 To be continued ...
+
+Update the data path and batch size.
