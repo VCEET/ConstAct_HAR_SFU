@@ -35,6 +35,6 @@ For ConsAct:
 python main\_train\_volvo.py
 
 
-## Test
+## Load Pretrained
 
 python main\_train\_volvo.py --load_pretrained True --pretrained_address path/to/address
