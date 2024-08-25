@@ -14,3 +14,4 @@ src/torchlight
 .vscode/*
 graph/infogcn/volvo.py
 graph/volvo.py
+my_test_volvo.sh

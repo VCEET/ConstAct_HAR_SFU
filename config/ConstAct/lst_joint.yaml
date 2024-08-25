@@ -1,23 +1,23 @@
 #work_dir: ./work_dir/ntu60/xsub/lst_joint
 
 # wandb
-wandb:  False #True 
+wandb:  True 
 wandb_name: 'LLM_ConstAct'
 #model_name: 'Fuser_BP_PL_middle24_max3_selfAttn'
 #model_name: 'ActionClip_vit16_noText2'
-model_name: 'Main'
+model_name: 'Main9'
 
-work_dir :  './output/ConstAct/lst_joint/Main'
+work_dir :  './output/ConstAct/lst_joint/Main9'
 # feeder
 feeder: feeders.feeder_volvo_RGB_pose.Feeder
 #feeder: feeders.feeder_ntu.Feeder
 
 train_feeder_args:
-  data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
+        #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
   # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
   # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
-  # data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
+  data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
   #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
@@ -36,11 +36,11 @@ train_feeder_args:
 #  num_segments : 8
 
 test_feeder_args:
-  data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
+        #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
     #data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
   # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
-  #data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
+  data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
   #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
@@ -87,7 +87,7 @@ model_args:
 weight_decay: 0.0005
 base_lr: 5.e-6  # 5.e-3 for resnet  #5.e-6 for ActionClip,  5.e-4 for clip
 lr_decay_rate: 0.1
-step: [35, 45]
+step: [10, 15]
 #freeze_epoch: 40
 warm_up_epoch: 5
 prompt_length: 24
@@ -95,7 +95,7 @@ class_position: "middle"
 
 # training
 device: [0]
-batch_size: 2 #16 # 32
-test_batch_size: 2 #16 #32
-num_epoch: 55
+batch_size: 16 # 32
+test_batch_size: 16 #32
+num_epoch: 20
 nesterov: True
