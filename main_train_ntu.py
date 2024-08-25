@@ -257,6 +257,11 @@ def get_parser():
         type=str2bool,
         default=False,
         help='if ture, the pretrained model will be loaded')
+    parser.add_argument)
+        '--pretrained_address',
+        type=str,
+        default='/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/LLM_HARfusion/output/ntu60/xsub/lst_joint/Main_cocoop/',
+        help='address of pretrained model')
     
 
     return parser
@@ -346,7 +351,7 @@ class Processor():
         self.loss = KLLoss().cuda(output_device)
 
         if self.arg.load_pretrained:
-            pretrained_path = '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/LLM_HARfusion/output/ntu60/xsub/lst_joint/Main_cocoop/'
+            pretrained_path = self.arg.pretrained_address
 
             state_dict_sleleton_encoder = torch.load(pretrained_path+'skeleton_encoder.pt')
             state_dict_model_visual = torch.load(pretrained_path+'model_visual.pt')

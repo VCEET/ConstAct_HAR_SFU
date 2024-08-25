@@ -19,3 +19,22 @@ Please follow [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN) for data preparat
 To be continued ...
 
 Update the data path and batch size.
+
+## Train
+
+For NTU60:
+
+python main\_train\_ntu.py
+
+For NTU120:
+
+python main\_train\ntu120.py
+
+For ConsAct:
+
+python main\_train\_volvo.py
+
+
+## Test
+
+python main\_train\_volvo.py --load_pretrained ----pretrained_address path/to/address

@@ -254,6 +254,18 @@ def get_parser():
         default='./work_dir/temp',
         help='the work folder for storing results')
 
+    parser.add_argument(
+        '--load_pretrained',
+        type=str2bool,
+        default=False,
+        help='if ture, the pretrained model will be loaded')
+
+    parser.add_argument)
+        '--pretrained_address',
+        type=str,
+        default='/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/LLM_HARfusion/output/ntu60/xsub/lst_joint/Main_cocoop/',
+        help='address of pretrained model')
+
     return parser
 
 class Processor():
@@ -351,6 +363,20 @@ class Processor():
 #        print(self.skeleton_encoder)
         self.loss_ce = nn.CrossEntropyLoss().cuda(output_device)
         self.loss = KLLoss().cuda(output_device)
+
+
+        if self.arg.load_pretrained:
+            pretrained_path = self.arg.pretrained_address
+
+            state_dict_sleleton_encoder = torch.load(pretrained_path+'skeleton_encoder.pt')
+            state_dict_model_visual = torch.load(pretrained_path+'model_visual.pt')
+            state_dict_model_text_2 = torch.load(pretrained_path+'model_text-skeleton.pt')
+            state_dict_visual_encoder = torch.load(pretrained_path+'visual_encoder.pt')
+            state_dict_fusion = torch.load(pretrained_path+'fusion.pt')
+            state_dict_prompts = torch.load(pretrained_path+'prompts.pt')
+            state_dict_meta_net = torch.load(pretrained_path+'meta_net_skeleton.pt')
+
+
 
         self.model_text_dict = nn.ModuleDict()
         self.model_visual_dict = nn.ModuleDict()
