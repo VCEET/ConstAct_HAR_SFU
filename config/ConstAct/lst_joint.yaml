@@ -1,7 +1,7 @@
 #work_dir: ./work_dir/ntu60/xsub/lst_joint
 
 # wandb
-wandb:  True 
+wandb:  False #True 
 wandb_name: 'LLM_ConstAct'
 #model_name: 'Fuser_BP_PL_middle24_max3_selfAttn'
 #model_name: 'ActionClip_vit16_noText2'
