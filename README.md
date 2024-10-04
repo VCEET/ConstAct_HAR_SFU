@@ -15,7 +15,9 @@ pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --e
 # Data Preparation
 
 You can download NTU and NTU120 datasets from [NTU](https://rose1.ntu.edu.sg/dataset/actionRecognition/) and follow [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN) for data preparation.
-Also, [NTU](https://vault.sfu.ca/index.php/s/GqQ2rDqhbpHVizk) and [NTU120](https://vault.sfu.ca/index.php/s/Qlth4RBN7CkSf3x) cropped images are provided.
+Also, NTU and NTU120 cropped images are provided here:
+
+[NTU](https://vault.sfu.ca/index.php/s/GqQ2rDqhbpHVizk) and [NTU120](https://vault.sfu.ca/index.php/s/Qlth4RBN7CkSf3x)
 
 VolvoConstAct dataset link: [Dataset](https://vault.sfu.ca/index.php/s/TsY56IcvQ1hR6F2)
 
