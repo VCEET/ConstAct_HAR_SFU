@@ -1,4 +1,4 @@
-# ConstScene_HAR_SFU
+# VolvoConstScene_HAR_SFU
 Code and related docs for the results of the collaboration with Dr. Mohammad Mahdavian and Prof. Mo Chen from SFU, Canada. 
 
 # Prerequisites
@@ -16,9 +16,7 @@ pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --e
 
 Please follow [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN) for data preparation
 
-To be continued ...
-
-Update the data path and batch size.
+VolvoConstAct dataset link: [Dataset](https://vault.sfu.ca/index.php/s/TsY56IcvQ1hR6F2)
 
 ## Train
 
