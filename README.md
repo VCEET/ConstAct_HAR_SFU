@@ -1,5 +1,5 @@
 # VolvoConstScene_HAR_SFU
-Code and related docs for the results of the collaboration with Dr. Mohammad Mahdavian and Prof. Mo Chen from SFU, Canada. 
+Repository for the paper ["Language Supervised Human Action Recognition with Salient Fusion: Construction Worker Action Recognition as a Use-Case"](https://arxiv.org/pdf/2410.01962) 
 
 # Prerequisites
 
