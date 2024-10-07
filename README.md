@@ -1,6 +1,8 @@
 # VolvoConstScene_HAR_SFU
 Repository for the paper ["Language Supervised Human Action Recognition with Salient Fusion: Construction Worker Action Recognition as a Use-Case"](https://arxiv.org/pdf/2410.01962) 
 
+![alt text](images/VCE_Usecase_5.jpg)
+
 # Prerequisites
 
 - Python >= 3.6
