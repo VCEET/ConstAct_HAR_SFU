@@ -131,7 +131,7 @@ class visual_prompt(nn.Module):
         self.frame_position_embeddings = nn.Embedding(context_length, embed_dim)
 
         self.transformer = TemporalTransformer(width=embed_dim, layers=6, heads=transformer_heads)
-        self.fc = nn.Linear(embed_dim, 60)
+        self.fc = nn.Linear(embed_dim, 17)
         self.apply(self.init_weights)
 
     def init_weights(self, module):
@@ -176,5 +176,5 @@ class visual_prompt(nn.Module):
       
         embeddings = x
         x = x.mean(dim=1, keepdim=False)
-        return embeddings, x #, [reduced_embeddings1,reduced_embeddings2,reduced_embeddings3,reduced_embeddings4]
-      #  return self.fc(x),x
+      #  return embeddings, x #, [reduced_embeddings1,reduced_embeddings2,reduced_embeddings3,reduced_embeddings4]
+        return self.fc(x),x

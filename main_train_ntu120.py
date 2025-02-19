@@ -344,18 +344,6 @@ class Processor():
         self.loss_ce = nn.CrossEntropyLoss().cuda(output_device)
         self.loss = KLLoss().cuda(output_device)
 
-        if self.arg.load_pretrained:
-            pretrained_path = '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/LLM_HARfusion/output/ntu60/xsub/lst_joint/Main_cocoop/'
-
-            state_dict_sleleton_encoder = torch.load(pretrained_path+'skeleton_encoder.pt')
-            state_dict_model_visual = torch.load(pretrained_path+'model_visual.pt')
-            state_dict_model_text_2 = torch.load(pretrained_path+'model_text-skeleton.pt')
-            state_dict_visual_encoder = torch.load(pretrained_path+'visual_encoder.pt')
-            state_dict_fusion = torch.load(pretrained_path+'fusion.pt')
-            state_dict_prompts = torch.load(pretrained_path+'prompts.pt')
-            state_dict_meta_net = torch.load(pretrained_path+'meta_net_skeleton.pt')
-
-
         self.model_text_dict = nn.ModuleDict()
         self.model_visual_dict = nn.ModuleDict()
         self.model_text_dict_2 = nn.ModuleDict()
@@ -398,16 +386,15 @@ class Processor():
             ])).cuda(self.output_device)
             ##
 
-            if self.arg.load_pretrained:
-                self.skeleton_encoder.load_state_dict(state_dict_sleleton_encoder)
-                self.model_visual.load_state_dict(state_dict_model_visual)
-                self.model_text_2.load_state_dict(state_dict_model_text_2)
-                self.visual_encoder.load_state_dict(state_dict_visual_encoder)
-                self.fusion.load_state_dict(state_dict_fusion)
-                self.prompt_learner2.load_state_dict(state_dict_prompts)
-                self.meta_net_skeleton.load_state_dict(state_dict_meta_net)
-
-                self.model_text_dict_2[name] = self.model_text_2.cuda(self.output_device)
+        if self.arg.load_pretrained:
+            pretrained_path = self.arg.pretrained_address
+            self.skeleton_encoder.load_state_dict(torch.load(os.path.join(pretrained_path,'skeleton_encoder.pt')))
+            self.model_visual.load_state_dict(torch.load(os.path.join(pretrained_path,'model_visual.pt')))
+            self.model_text_2.load_state_dict(torch.load(os.path.join(pretrained_path,'model_text-skeleton.pt')))
+            self.visual_encoder.load_state_dict(torch.load(os.path.join(pretrained_path,'visual_encoder.pt')))
+            self.fusion.load_state_dict(torch.load(os.path.join(pretrained_path,'fusion.pt')))
+            self.prompt_learner2.load_state_dict(torch.load(os.path.join(pretrained_path,'prompts.pt')))
+            self.meta_net_skeleton.load_state_dict(torch.load(os.path.join(pretrained_path,'meta_net_skeleton.pt')))
 
 
         if self.arg.weights:

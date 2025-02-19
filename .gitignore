@@ -15,3 +15,4 @@ src/torchlight
 graph/infogcn/volvo.py
 graph/volvo.py
 smac3_output
+my_test_volvo.sh

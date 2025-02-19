@@ -38,7 +38,7 @@ import wandb
 import torch.multiprocessing
 
 from clip.prompt_learning import PromptLearner, TextEncoder
-import matplotlib.pyplot as plt
+
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -49,14 +49,15 @@ classes_visual, num_text_aug_visual, text_dict_visual = text_visual_prompt()
 text_aug_visual = text_visual_prompt_descriptive()
 
 
-class_names = []
+# class_names = []
 
-with open('text/ntu120_label_map.txt') as infile:
-    lines = infile.readlines()
-    for ind, line in enumerate(lines):
-        class_names.append(line.rstrip().lstrip())
+# with open('text/ntu120_label_map.txt') as infile:
+#     lines = infile.readlines()
+#     for ind, line in enumerate(lines):
+#         class_names.append(line.rstrip().lstrip())
 
-class_names = class_names[:60]
+# class_names = class_names[:60]
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -101,7 +102,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd-cross-subject/lst_joint.yaml',
+        default='./config/ConstAct/lst_joint_onlyVideo.yaml',
         help='path to the configuration file')
 
     # processor
@@ -129,12 +130,12 @@ def get_parser():
     parser.add_argument(
         '--save-epoch',
         type=int,
-        default=0,
+        default=1,
         help='the start epoch to save model (#iteration)')
     parser.add_argument(
         '--eval-interval',
         type=int,
-        default=5,
+        default=1,
         help='the interval for evaluating models (#iteration)')
     parser.add_argument(
         '--print-log',
@@ -154,7 +155,7 @@ def get_parser():
     parser.add_argument(
         '--num-worker',
         type=int,
-        default=14,
+        default=18,
         help='the number of worker for data loader')
     parser.add_argument(
         '--train-feeder-args',
@@ -184,7 +185,15 @@ def get_parser():
         default=[],
         nargs='+',
         help='the name of weights which will be ignored in the initialization')
-
+    parser.add_argument(
+        '--prompt-length',
+        type=int,
+        default=10,
+        help='the length of learnable prompt')
+    parser.add_argument(
+        '--class-position',
+        default="middle",
+        help='the position of class label in learnable prompt')
     # optim
     parser.add_argument(
         '--base-lr', type=float, default=0.001, help='initial learning rate')
@@ -200,15 +209,6 @@ def get_parser():
         default=0,
         nargs='+',
         help='the indexes of GPUs for training or testing')
-    parser.add_argument(
-        '--prompt-length',
-        type=int,
-        default=10,
-        help='the length of learnable prompt')
-    parser.add_argument(
-        '--class-position',
-        default="middle",
-        help='the position of class label in learnable prompt')
     parser.add_argument('--optimizer', default='AdamW', help='type of optimizer')
     parser.add_argument(
         '--nesterov', type=str2bool, default=False, help='use nesterov or not')
@@ -252,18 +252,6 @@ def get_parser():
         default='./work_dir/temp',
         help='the work folder for storing results')
 
-    parser.add_argument(
-        '--load_pretrained',
-        type=str2bool,
-        default=False,
-        help='if ture, the pretrained model will be loaded')
-    parser.add_argument)
-        '--pretrained_address',
-        type=str,
-        default='/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/LLM_HARfusion/output/ntu60/xsub/lst_joint/Main_cocoop/',
-        help='address of pretrained model')
-    
-
     return parser
 
 class Processor():
@@ -277,11 +265,21 @@ class Processor():
         if arg.phase == 'train':
             if not arg.train_feeder_args['debug']:
                 arg.model_saved_name = os.path.join(arg.work_dir, 'runs')
+              #  if os.path.isdir(arg.model_saved_name):
+              #      print('log_dir: ', arg.model_saved_name, 'already exist')
+              #      answer = input('delete it? y/n:')
+              #      if answer == 'y':
+              #          shutil.rmtree(arg.model_saved_name)
+              #          print('Dir removed: ', arg.model_saved_name)
+              #          input('Refresh the website of tensorboard by pressing any keys')
+              #      else:
+              #          print('Dir not removed: ', arg.model_saved_name)
                 self.train_writer = SummaryWriter(os.path.join(arg.model_saved_name, 'train'), 'train')
                 self.val_writer = SummaryWriter(os.path.join(arg.model_saved_name, 'val'), 'val')
             else:
                 self.train_writer = self.val_writer = SummaryWriter(os.path.join(arg.model_saved_name, 'test'), 'test')
         self.global_step = 0
+        # pdb.set_trace()
         self.load_model()
 
         if self.arg.phase == 'model_size':
@@ -322,8 +320,6 @@ class Processor():
                     
     def load_data(self):
         Feeder = import_class(self.arg.feeder)
-        print("Number of worker is : ", self.arg.num_worker)
-        print("----------------------------")
         self.data_loader = dict()
         if self.arg.phase == 'train':
             self.data_loader['train'] = torch.utils.data.DataLoader(
@@ -346,62 +342,31 @@ class Processor():
         self.output_device = output_device
         Model = import_class(self.arg.model)
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
+   #     print(Model)
         self.skeleton_encoder = Model(**self.arg.model_args)
+   #     print(self.skeleton_encoder)
         self.loss_ce = nn.CrossEntropyLoss().cuda(output_device)
         self.loss = KLLoss().cuda(output_device)
 
         self.model_text_dict = nn.ModuleDict()
         self.model_visual_dict = nn.ModuleDict()
-        self.model_text_dict_2 = nn.ModuleDict()
 
         for name in self.arg.model_args['head']:
             self.model_, model_state_dict = clip.load(name, device)
-            self.model_text = TextEncoder(self.model_)
+           # self.model_text = TextEncoder(self.model_)
+            self.model_text = TextCLIP(self.model_)
             self.model_text = self.model_text.cuda(self.output_device)
             self.model_text_dict[name] = self.model_text
 
-            self.model_2, model_state_dict2 = clip.load(name, device)
-            self.model_text_2 = TextEncoder(self.model_2)
-            self.model_text_2 = self.model_text_2.cuda(self.output_device)
-            self.model_text_dict_2[name] = self.model_text_2
-
+       #     del self.model_2.visual
+#            heatmap = heatmap_renderer()
+#            self.model_visual, self.model_pose, self.Pose2Feat = heatmap.model()
             self.model_visual = ImageCLIP(self.model_)
 
             self.model_visual = self.model_visual.cuda(self.output_device)
             self.model_visual_dict[name] = self.model_visual
 
             self.visual_encoder = visual_prompt("Transf",model_state_dict,8).cuda(self.output_device)
-            self.fusion = Fuser(self.output_device,self.arg.model_args['num_class']).cuda(self.output_device)
-
-            self.prompt_learner2 = PromptLearner(class_names, self.model_2,self.arg.prompt_length,self.arg.class_position).cuda(self.output_device)
-            self.tokenized_prompts2 = self.prompt_learner2.tokenized_prompts.cuda(self.output_device)
-            self.prompts2 = self.prompt_learner2().unsqueeze(0).repeat(num_text_aug,1,1,1)
-
-            self.tokenized_prompts2 = self.tokenized_prompts2.unsqueeze(0).repeat(num_text_aug,1,1)
-            
-            ## Added for conditional prompt learning
-            self.meta_net_visual = nn.Sequential(OrderedDict([
-            ("linear1", nn.Linear(512, 512 // 16)),
-            ("relu", nn.ReLU(inplace=True)),
-            ("linear2", nn.Linear(512 // 16, self.arg.prompt_length))
-            ])).cuda(self.output_device)
-            self.meta_net_skeleton = nn.Sequential(OrderedDict([
-            ("linear1", nn.Linear(512, 512 // 16)),
-            ("relu", nn.ReLU(inplace=True)),
-            ("linear2", nn.Linear(512 // 16, self.arg.prompt_length))
-            ])).cuda(self.output_device)
-            ##
-
-        if self.arg.load_pretrained:
-            pretrained_path = self.arg.pretrained_address
-            self.skeleton_encoder.load_state_dict(torch.load(os.path.join(pretrained_path,'skeleton_encoder.pt')))
-            self.model_visual.load_state_dict(torch.load(os.path.join(pretrained_path,'model_visual.pt')))
-            self.model_text_2.load_state_dict(torch.load(os.path.join(pretrained_path,'model_text-skeleton.pt')))
-            self.visual_encoder.load_state_dict(torch.load(os.path.join(pretrained_path,'visual_encoder.pt')))
-            self.fusion.load_state_dict(torch.load(os.path.join(pretrained_path,'fusion.pt')))
-            self.prompt_learner2.load_state_dict(torch.load(os.path.join(pretrained_path,'prompts.pt')))
-            self.meta_net_skeleton.load_state_dict(torch.load(os.path.join(pretrained_path,'meta_net_skeleton.pt')))
-
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])
@@ -435,21 +400,32 @@ class Processor():
                 self.skeleton_encoder.load_state_dict(state)
 
     def load_optimizer(self):
-        if self.arg.optimizer == 'AdamW':
+        if self.arg.optimizer == 'SGD':
+            self.optimizer = optim.SGD(
+                [#{'params': self.skeleton_encoder.parameters(),'lr': self.arg.base_lr},
+                 {'params': self.visual_encoder.parameters(),'lr': self.arg.base_lr},
+                 {'params': self.model_.parameters(), 'lr': self.arg.base_lr*self.arg.te_lr_ratio}],
+                lr=self.arg.base_lr,
+                momentum=0.9,
+                nesterov=self.arg.nesterov,
+                weight_decay=self.arg.weight_decay)
+        elif self.arg.optimizer == 'AdamW':
             vision_params = list(map(id, self.model_.visual.parameters()))
             text_params = filter(lambda p: id(p) not in vision_params,
                                  self.model_.parameters())
 
-            self.optimizer = optim.AdamW([{'params': self.skeleton_encoder.parameters(),'lr': self.arg.base_lr*10},
+            self.optimizer = optim.AdamW([#{'params': text_params,'lr': self.arg.base_lr},
                  {'params': self.visual_encoder.parameters(),'lr': self.arg.base_lr*10},
-                 {'params': self.model_.visual.parameters(), 'lr': self.arg.base_lr},
-                 {'params': self.fusion.parameters(), 'lr':self.arg.base_lr*10},
-                 {'params': self.model_text_2.parameters(), 'lr':self.arg.base_lr},
-                 {'params': self.prompt_learner2.parameters(), 'lr':self.arg.base_lr*10},
-                 {'params': self.meta_net_skeleton.parameters(), 'lr':self.arg.base_lr*10},],
+                 {'params': self.model_.visual.parameters(), 'lr': self.arg.base_lr}
+              ],
                 betas=(0.9, 0.98),lr=self.arg.base_lr, eps=1e-8,
                 weight_decay=self.arg.weight_decay)
                                  
+            # self.optimizer = optim.AdamW([#{'params': self.skeleton_encoder.parameters(),'lr': self.arg.base_lr},
+            #      {'params': self.visual_encoder.parameters(),'lr': self.arg.base_lr},
+            #      {'params': self.model_.parameters(), 'lr': self.arg.base_lr*self.arg.te_lr_ratio}],
+            #     lr=self.arg.base_lr,
+            #     weight_decay=self.arg.weight_decay)
         else:
             raise ValueError()
 
@@ -501,14 +477,10 @@ class Processor():
         return split_time
 
     def train(self, epoch, save_model=False):
-        self.skeleton_encoder.train()
         self.model_visual.train()
+      #  self.model_text.train()
         self.visual_encoder.train()
-        self.fusion.train()
-        self.model_text_2.train()
-        self.prompt_learner2.train()
-        self.meta_net_skeleton.train()
-        
+
         ## You may add model_text or model_visual to the optimizer
 
         self.print_log('Training epoch: {}'.format(epoch + 1))
@@ -526,12 +498,12 @@ class Processor():
         process = tqdm(loader, ncols=40)
 
         t_start = time.time()
-
         for batch_idx, (data, label, index, RGB_images, data_bone) in enumerate(process):       
 
             self.global_step += 1
             with torch.no_grad():
                 data = data.float().cuda(self.output_device)
+               ## RGB_images = RGB_images.float().cuda(self.output_device)
             timer['dataloader'] += self.split_time()
             self.optimizer.zero_grad()
             
@@ -540,63 +512,47 @@ class Processor():
 
             # forward
             with torch.cuda.amp.autocast():
+                ## Text generation
+                # visual
+                text_id = np.random.randint(num_text_aug_visual,size=len(label))
+                texts_visual = torch.stack([text_dict_visual[j][i,:] for i,j in zip(label,text_id)]).to(device)
+                text_embedding_visual = self.model_text_dict[self.arg.model_args['head'][0]](texts_visual).float()
 
-                ## Visual Encoding
+   #             ## Visual Encoding
                 b,t,c,h,w = RGB_images.size()
-                RGB_images= RGB_images.float().to(device)
-                image_embedding = self.model_visual(RGB_images.reshape(-1,c,h,w)) 
+                RGB_images= RGB_images.float().to(device)  #.view(-1,c,h,w) # omit the Image.fromarray if the images already in PIL format, change this line to images=list_image if using preprocess inside the dataset class
+                image_embedding = self.model_visual(RGB_images.reshape(-1,c,h,w)) #,skip_early=False).mean((2,3))
 
                 image_embedding = image_embedding.view(b,t,-1)
-                visual_features, image_embedding = self.visual_encoder(image_embedding)
-
-                ## Text generation
-                ## Skeleton Encoding
-                skeleton_features, feature_dict, logit_scale, part_feature_list = self.skeleton_encoder(data)
-
-                ## Text generation skeleton
-                text_embedding_skeleton_list = []
-                for ind in range(num_text_aug):              
-
-                    if ind > 0:
-                        skeleton_prompt_feat = self.meta_net_skeleton(part_feature_list[ind-1]).unsqueeze(-1)
-                        self.prompts2[ind,label][:,1:1+self.arg.prompt_length] += skeleton_prompt_feat
-                    else:
-                        skeleton_prompt_feat = self.meta_net_skeleton(feature_dict['ViT-B/16']).unsqueeze(-1)
-                        self.prompts2[ind,label][:,1:1+self.arg.prompt_length] += skeleton_prompt_feat
-                    
-                    text_embedding_skeleton = self.model_text_dict_2[self.arg.model_args['head'][0]](self.prompts2[ind,label],self.tokenized_prompts2[ind,label]).float()
-                    text_embedding_skeleton_list.append(text_embedding_skeleton)
+                output, image_embedding = self.visual_encoder(image_embedding)
 
                 ## loss calculations
-                # skeleton loss
-                loss_te_list = []
-                for ind in range(num_text_aug):
-                    if ind == 0:
-                        logits_per_image, logits_per_text = create_logits(feature_dict[self.arg.model_args['head'][0]],text_embedding_skeleton_list[ind],logit_scale[:,0].mean())
-                        ground_truth = torch.tensor(label_g,dtype=feature_dict[self.arg.model_args['head'][0]].dtype,device=device)
-                    else:
-                        logits_per_image, logits_per_text = create_logits(part_feature_list[ind-1],text_embedding_skeleton_list[ind],logit_scale[:,ind].mean())
-                        ground_truth = torch.tensor(label_g,dtype=part_feature_list[ind-1].dtype,device=device)
-                    loss_imgs = self.loss(logits_per_image,ground_truth)
-                    loss_texts = self.loss(logits_per_text,ground_truth)
-                    loss_te_list.append((loss_imgs + loss_texts) / 2)
-                loss_pose = sum(loss_te_list) / len(loss_te_list)
+                # visual loss
+                loss_visual_list = []
 
-                ## Fusing the two modalities
-                output = self.fusion(visual_features,skeleton_features)
+           #     logits_per_image_v, logits_per_text_v = create_logits(image_embedding,text_embedding_visual,self.logit_scale[:,0].mean()) #logit_scale)
+            #    ground_truth = torch.tensor(label_g,dtype=image_embedding.dtype,device=device)
+
+            #    loss_imgs_v = self.loss(logits_per_image_v,ground_truth)
+            #    loss_texts_v = self.loss(logits_per_text_v,ground_truth)
+            #    loss = (loss_imgs_v + loss_texts_v)/2
+
+            #    loss_visual_list.append((loss_imgs_v + loss_texts_v)/2)
+            #    loss_visual =  sum(loss_visual_list) / len(loss_visual_list)
 
                 ## Calc loss
                 loss_ce = self.loss_ce(output, label)
-                loss = loss_ce + self.arg.loss_alpha*loss_pose
-        
+                loss = loss_ce # + self.arg.loss_alpha *loss_visual # + loss_pose
+                
             scaler.scale(loss).backward()
 
             scaler.step(self.optimizer)
             scaler.update()
 
             loss_total_value.append(loss.data.item())
-            loss_pose_value.append(loss_pose.item())
+   #         loss_pose_value.append(loss_pose.item())
             loss_cls_value.append(loss_ce.item())
+         #   loss_visual_value.append(loss_visual.item())
 
             timer['model'] += self.split_time()
 
@@ -621,39 +577,22 @@ class Processor():
         self.print_log('\tTime consumption: [Data]{dataloader}, [Network]{model}'.format(**proportion))
 
         if save_model:
-            state_dict_sleleton_encoder = self.skeleton_encoder.state_dict()
-            state_dict_model_visual = self.model_visual.state_dict()
-            state_dict_model_text_2 = self.model_text_2.state_dict()
-            state_dict_visual_encoder = self.visual_encoder.state_dict()
-            state_dict_fusion = self.fusion.state_dict()
-            state_dict_prompt_learner2 = self.prompt_learner2.state_dict()
-            state_dict_meta_net_skeleton = self.meta_net_skeleton.state_dict()
-           
-            epoch_path = self.arg.work_dir+'/'+str(epoch)
-            os.makedirs(epoch_path, exist_ok=True)
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_sleleton_encoder.items()])
-            torch.save(weights, epoch_path + '/skeleton_encoder' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_visual_encoder.items()])
-            torch.save(weights, epoch_path + '/visual_encoder' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_model_visual.items()])
-            torch.save(weights, epoch_path +  '/model_visual' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_model_text_2.items()])
-            torch.save(weights, epoch_path + '/model_text-skeleton' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_fusion.items()])
-            torch.save(weights, epoch_path + '/fusion' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_prompt_learner2.items()])
-            torch.save(weights, epoch_path + '/prompts' + '.pt')
-            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict_meta_net_skeleton.items()])
-            torch.save(weights, epoch_path + '/meta_net_skeleton' + '.pt')
-
+            state_dict = self.skeleton_encoder.state_dict()
+            weights = OrderedDict([[k.split('module.')[-1], v.cpu()] for k, v in state_dict.items()])
+            torch.save(weights, self.arg.model_saved_name + '-' + str(epoch+1) + '-' + str(int(self.global_step)) + '.pt')
 
         elapsed_time_train = time.time()-t_start
         self.log['train_loss_cls'].append(np.mean(loss_cls_value))
-        self.log['train_loss_pose'].append(np.mean(loss_pose_value))
+     #   self.log['train_loss_pose'].append(np.mean(loss_pose_value))
+     #   self.log['train_loss_visual'].append(np.mean(loss_visual_value))
         self.log['train_loss_total'].append(np.mean(loss_total_value))
 
         self.log['lrate'].append(self.lr)
         self.log['elapsed_time_train'].append(elapsed_time_train)
+
+
+#        val_loader = self.data_loader['test']
+#        acc = self.validate(epoch,val_loader, classes_visual, device, self.model_,self.visual_encoder ,num_text_aug_visual)
 
 
     def eval(self, epoch, save_score=False, loader_name=['test'], wrong_file=None, result_file=None):
@@ -661,9 +600,7 @@ class Processor():
             f_w = open(wrong_file, 'w')
         if result_file is not None:
             f_r = open(result_file, 'w')
-        self.skeleton_encoder.eval()
         self.visual_encoder.eval()
-        self.fusion.eval()
         self.print_log('Eval epoch: {}'.format(epoch + 1))
         for ln in loader_name:
             loss_value = []
@@ -678,19 +615,16 @@ class Processor():
             for batch_idx, (data, label, index, RGB_images, data_bone) in enumerate(process):
                 label_list.append(label)
                 with torch.no_grad():
+                    # print(data.size())
                     b, _, _, _, _ = data.size()
                     data = data.float().cuda(self.output_device)
                     label = label.long().cuda(self.output_device)
                     RGB_images = RGB_images.float().cuda(self.output_device)
 
                     b,t,c,h,w = RGB_images.size()
-                    image_embedding = self.model_visual(RGB_images.reshape(-1,c,h,w)) 
+                    image_embedding = self.model_visual(RGB_images.reshape(-1,c,h,w)) #,skip_early=False).mean((2,3))
                     image_embedding = image_embedding.view(b,t,-1)
-                    visual_features, image_embedding = self.visual_encoder(image_embedding)
-
-                    skeleton_features, _, _, _ = self.skeleton_encoder(data)
-
-                    output = self.fusion(visual_features,skeleton_features)
+                    output, image_embedding = self.visual_encoder(image_embedding)
 
                     loss = self.loss_ce(output, label)
 
@@ -756,6 +690,54 @@ class Processor():
                 writer.writerow(each_acc)
                 writer.writerows(confusion)
 
+    def validate(self,epoch, val_loader, classes, device, model, skeleton_encoder, num_text_aug):
+        model.eval()
+        skeleton_encoder.eval()
+        num = 0
+        corr_1 = 0
+        corr_5 = 0
+
+        with torch.no_grad():
+
+            text_inputs = classes.to(device)
+            text_features = model.encode_text(text_inputs)
+            for iii, (data, label, index, image) in enumerate(tqdm(val_loader)):
+
+                # texts_visual = list()
+                # for i in range(len(label)):
+                #     text_id = np.random.randint(num_text_aug_visual,size=1)
+                #     text_item = text_dict_visual[text_id.item()][label[i]]
+                #     texts_visual.append(text_item.unsqueeze(0))
+                # texts_visual = torch.cat(texts_visual).cuda(self.output_device)
+                # text_features = self.model_text_dict[self.arg.model_args['head'][0]](texts_visual).float()
+
+                b, t, c, h, w = image.size()
+                class_id = label.to(device)
+                image_input = image.to(device).view(-1, c, h, w)
+                image_features = model.encode_image(image_input).view(b, t, -1)
+                output_visual, image_features = skeleton_encoder(image_features)
+                image_features /= image_features.norm(dim=-1, keepdim=True)
+                text_features /= text_features.norm(dim=-1, keepdim=True)
+                similarity = (100.0 * image_features @ text_features.T)
+                similarity = similarity.view(b, num_text_aug, -1).softmax(dim=-1)
+                similarity = similarity.mean(dim=1, keepdim=False)
+                values_1, indices_1 = similarity.topk(1, dim=-1)
+                values_5, indices_5 = similarity.topk(5, dim=-1)
+                num += b
+                for i in range(b):
+                    if indices_1[i] == class_id[i]:
+                        corr_1 += 1
+                    if class_id[i] in indices_5[i]:
+                        corr_5 += 1
+        top1 = float(corr_1) / num * 100
+        top5 = float(corr_5) / num * 100
+        self.log['Accuracy'].append(top1/100)
+
+    #    wandb.log({"top1": top1})
+    #    wandb.log({"top5": top5})
+        print('Epoch: [{}/{}]: Top1: {}, Top5: {}'.format(epoch, 100, top1, top5))
+        return top1
+    
     def start(self):
         self.log = OrderedDict([
                         ('epoch', []),
@@ -775,7 +757,7 @@ class Processor():
             self.global_step = self.arg.start_epoch * len(self.data_loader['train']) / self.arg.batch_size
             def count_parameters(model):
                 return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
+            self.print_log(f'# Parameters: {count_parameters(self.visual_encoder)}')
             start_epoch = 0
             for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
                 save_model = (((epoch + 1) % self.arg.save_interval == 0) or (

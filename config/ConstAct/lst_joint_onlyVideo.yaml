@@ -1,22 +1,20 @@
 #work_dir: ./work_dir/ntu60/xsub/lst_joint
 
 # wandb
-wandb:  False #True 
-wandb_name: 'LLM_ConstAct'
+wandb: True 
+wandb_name: 'LLM_volvo'
 #model_name: 'Fuser_BP_PL_middle24_max3_selfAttn'
 #model_name: 'ActionClip_vit16_noText2'
-model_name: 'Main9'
+model_name: 'Volvo_onlyVideo'
 
-work_dir :  './output/ConstAct/lst_joint/Main9'
+work_dir :  './output/ConstAct/lst_joint/Volvo_onlyVideo'
 # feeder
 feeder: feeders.feeder_volvo_RGB_pose.Feeder
 #feeder: feeders.feeder_ntu.Feeder
 
 train_feeder_args:
-        #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-  # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-  # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
+  #  data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/ 
   data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
@@ -36,11 +34,9 @@ train_feeder_args:
 #  num_segments : 8
 
 test_feeder_args:
-        #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-    #data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
   #data_path: /localhome/mmahdavi/Downloads/volvo_dataset/
-  # data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
   data_path: /project/mars-lab/mmahdavi/activity_recognition/my_dataset/volvo_dataset/
+  #  data_path: /localscratch/mmahdavi/TransHAR/data/volvo_dataset/
   #data_path: data/ntu/NTU60_CS.npz
   #img_src_path : '/localhome/mmahdavi/Mohammad_ws/human_activity_recognition/TransHAR/data/NTU/data/'
   #img_src_path : '/localscratch/mmahdavi/TransHAR/data/NTU/data/'
